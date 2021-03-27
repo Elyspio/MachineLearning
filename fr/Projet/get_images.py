@@ -1,26 +1,16 @@
 import json
 import os.path
+import re
+import urllib
 
-from bs4 import BeautifulSoup
-from urllib.request import urlopen, urlretrieve
+from get_metadata import  get_metadata
+from util import download_img, scrap
+
 
 URL = "https://commons.wikimedia.org/wiki/Commons:Featured_pictures/Astronomy"
 
 
-def scrap(url: str):
-    u = urlopen(url)
-    try:
-        print("scrapping: " + url)
-        html = u.read().decode('utf-8')
-    finally:
-        u.close()
-    return BeautifulSoup(html, "html.parser")
-
-
 def main():
-
-    os.mkdir()
-
     soup = scrap(URL)
     galleries = soup.find_all("ul", {"class": "gallery"})
 
@@ -60,30 +50,25 @@ def main():
                 image_link = images_links[i]
                 img_name = image_link[image_link.rfind("/") + 1:]
                 path = os.path.join(os.path.dirname(__file__), "images", img_name)
-                download_img(image_link, path)
-                categories = get_categories(categories_links[i])
-                categories.append(gallery_title_str),
+
+                if not os.path.exists(path):
+                    download_img(image_link, path)
+
+                metadata = get_metadata(path, categories_links[i])
+                metadata["categories"].append(gallery_title_str)
+
                 data.append({
-                    "img_url": image_link,
-                    "categories": categories,
-                    "img_path": img_name
+                    "img": {
+                        "path": img_name,
+                        "url": image_link
+                    },
+                    "metadata": metadata,
                 })
 
     with open(os.path.join(os.path.dirname(__file__), "images", "metadata.json", ), 'w') as outfile:
         json.dump(data, outfile, indent=4)
 
 
-def download_img(url: str, output: str) -> None:
-    urlretrieve(url, output)
-
-
-def get_categories(url: str):
-    soup = scrap(url)
-    container = soup.find("div", {"id": "mw-normal-catlinks"})
-    ul = container.find("ul")
-    links = ul.find_all("a")
-    return list(map(lambda link: link.getText(), links))
-
-
 if __name__ == '__main__':
     main()
+
