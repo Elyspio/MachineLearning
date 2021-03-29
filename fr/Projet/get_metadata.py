@@ -1,19 +1,23 @@
 import math
 
 import numpy
-from PIL import Image
+from PIL import ImageColor
 from sklearn.cluster import KMeans
 
-from util import scrap, get_img
+from util import get_img, scrap
 
 
 def get_metadata(path: str, url: str):
+    """
+    :param path: Chemin vers l'image
+    :param url: Url vers les métadonnées de l'image sur WikiMedia
+    :return: les métadonnées correspondantes à cette image (tags)
+    """
     return {
         "colors": get_colors(path),
         "ratio": get_ratio(path),
         "categories": get_categories(url)
     }
-    pass
 
 
 def get_colors(path: str, nb_colors=4):
@@ -48,7 +52,15 @@ def get_colors(path: str, nb_colors=4):
 
     # Liste de couleurs
 
-    return colors
+    def convert_to_rgb(color: str):
+        (r, g, b) = ImageColor.getrgb(color)
+        return {
+            "r": r,
+            "g": g,
+            "b": b
+        }
+
+    return list(map(convert_to_rgb, colors))
 
 
 def get_ratio(path: str):

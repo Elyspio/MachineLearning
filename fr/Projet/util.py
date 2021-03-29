@@ -1,12 +1,15 @@
 import json
 import os
+import random
 from urllib.request import urlopen, urlretrieve
-from PIL import Image
 
+from PIL import Image
 from bs4 import BeautifulSoup
 
-
 # Télécharge une image
+from config import images_path
+
+
 def download_img(url: str, output: str) -> None:
     urlretrieve(url, output)
 
@@ -29,7 +32,23 @@ def get_img(path: str) -> Image:
 
 # Lit les metadata d'une image à partir de son chemin sur le disque
 def get_metadata_for_img(img: str):
-    with open(os.path.join(os.path.dirname(__file__), "images", "metadata.json"), "r") as metadata:
+    with open(os.path.join(images_path, "metadata.json"), "r") as metadata:
         data = list(json.load(metadata))
         return list(x for x in data if x["img"]["path"] == img)[0]["metadata"]
 
+
+def get_random_images(nb_images: int):
+    """
+
+    :param imgs:
+    :param nb_images:
+    """
+    all_images = list(filter(lambda x: "metadata.json" not in x, os.listdir(images_path)))
+
+    imgs = random.sample(all_images, nb_images)
+    return imgs
+
+
+def ensure_dir(path: str):
+    if not os.path.exists(path):
+        os.makedirs(path)
