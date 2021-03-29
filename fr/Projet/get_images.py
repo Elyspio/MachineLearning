@@ -3,14 +3,24 @@ import os.path
 import re
 import urllib
 
-from get_metadata import  get_metadata
+from get_metadata import get_metadata
 from util import download_img, scrap
-
 
 URL = "https://commons.wikimedia.org/wiki/Commons:Featured_pictures/Astronomy"
 
 
+
+
 def main():
+    """
+    Point d'entrée de récupération des données
+
+     - Récupére les images à partir de l'url ci-dessus
+     - Puis les tags à partir
+         - de leur emplacement du site
+         - de leur couleur 4 couleurs prédominantes
+    """
+
     soup = scrap(URL)
     galleries = soup.find_all("ul", {"class": "gallery"})
 
@@ -71,4 +81,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
